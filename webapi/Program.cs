@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CopilotChat.WebApi.Extensions;
 using CopilotChat.WebApi.Hubs;
 using CopilotChat.WebApi.Services;
+using CopilotChat.Skills.Extensions;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Builder;
@@ -54,6 +55,8 @@ public sealed class Program
             .AddSemanticKernelServices()
             .AddPlannerServices()
             .AddSemanticMemoryServices();
+
+        builder.Services.AddDocumentRepository(builder.Configuration);
 
         // Add SignalR as the real time relay service
         builder.Services.AddSignalR();

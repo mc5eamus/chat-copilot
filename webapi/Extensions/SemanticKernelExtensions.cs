@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using CopilotChat.Skills.Contracts;
+using CopilotChat.Skills.Extensions;
 using CopilotChat.WebApi.Hubs;
 using CopilotChat.WebApi.Models.Response;
 using CopilotChat.WebApi.Options;
@@ -75,7 +77,7 @@ internal static class SemanticKernelExtensions
 
         // Add any additional setup needed for the kernel.
         // Uncomment the following line and pass in a custom hook for any complimentary setup of the kernel.
-        // builder.Services.AddKernelSetupHook(customHook);
+        builder.Services.AddKernelSetupHook(RegisterPluginsAsync);
 
         return builder;
     }
@@ -141,6 +143,7 @@ internal static class SemanticKernelExtensions
 
         // Add the hook to the service collection
         services.AddScoped<RegisterSkillsWithPlannerHook>(sp => registerPluginsHook);
+
         return services;
     }
 
@@ -192,6 +195,13 @@ internal static class SemanticKernelExtensions
     private static Task RegisterPluginsAsync(IServiceProvider sp, IKernel kernel)
     {
         var logger = kernel.LoggerFactory.CreateLogger(nameof(Kernel));
+
+        var orchestrator = sp.GetRequiredService<IDocumentRepository>();
+
+        kernel.ImportSkill(new TimeSkill(), nameof(TimeSkill));
+
+        // import document comparison skill
+        kernel.WithComparisonSkills(sp);
 
         // Semantic plugins
         ServiceOptions options = sp.GetRequiredService<IOptions<ServiceOptions>>().Value;
